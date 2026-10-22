@@ -68,10 +68,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Employee Management System</title>
+    <title>Employee Management System - Login</title>
     
-    <!-- Custom Circular Favicon na kapareho ng Logo Badge -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23ffffff'/><text x='50' y='36' font-family='Georgia, serif' font-style='italic' font-weight='bold' font-size='18' fill='%231b4332' text-anchor='middle'>Employee</text><text x='50' y='55' font-family='Georgia, serif' font-style='italic' font-weight='bold' font-size='14' fill='%231b4332' text-anchor='middle'>&amp;</text><text x='50' y='75' font-family='Georgia, serif' font-style='italic' font-weight='bold' font-size='16' fill='%231b4332' text-anchor='middle'>Management</text></svg>">
+    <!-- Custom Circular Favicon: Employee Management System -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='white' stroke='%230b3b24' stroke-width='3'/%3E%3Ctext x='50%25' y='36%25' font-family='Georgia, serif' font-style='italic' font-weight='bold' font-size='10' fill='%230b3b24' text-anchor='middle' dominant-baseline='middle'%3EEmployee%3C/text%3E%3Ctext x='50%25' y='52%25' font-family='Georgia, serif' font-style='italic' font-weight='bold' font-size='9' fill='%230b3b24' text-anchor='middle' dominant-baseline='middle'%3EManagement%3C/text%3E%3Ctext x='50%25' y='68%25' font-family='Georgia, serif' font-style='italic' font-weight='bold' font-size='10' fill='%230b3b24' text-anchor='middle' dominant-baseline='middle'%3ESystem%3C/text%3E%3C/svg%3E">
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -83,14 +83,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             overflow: hidden;
         }
 
-        /* Background Garden Image - Naka-center na ang laman */
         .bg-garden {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+            background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
                         url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1920&auto=format&fit=crop') no-repeat center center/cover;
             display: flex;
             align-items: center;
@@ -98,101 +97,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             padding: 15px;
         }
 
-        /* Intro Preloader Screen Overlay */
-        #intro-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)),
-                        url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1920&auto=format&fit=crop') no-repeat center center/cover;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-            padding: 20px;
-        }
-
-        /* Circular Logo Badge */
-        .intro-logo-badge {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
-            margin-bottom: 25px;
-            padding: 10px;
-            text-align: center;
-            font-family: 'Georgia', serif;
-            font-style: italic;
-            font-weight: bold;
-            color: #1b4332;
-            overflow: hidden;
-            box-sizing: border-box;
-        }
-
-        .intro-logo-badge .title-top {
-            font-size: 0.85rem;
-            line-height: 1;
-            white-space: nowrap;
-        }
-
-        .intro-logo-badge .title-amp {
-            font-size: 0.65rem;
-            line-height: 1;
-            margin: 2px 0;
-        }
-
-        .intro-logo-badge .title-bottom {
-            font-size: 0.8rem;
-            line-height: 1;
-            white-space: nowrap;
-        }
-
-        /* Animated Welcome Text */
-        .animated-welcome-wrapper {
-            display: inline-block;
-            max-width: 100%;
-            text-align: center;
-        }
-
-        .animated-welcome-text {
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: #ffffff;
-            border-right: 3px solid #2ecc71;
-            white-space: nowrap;
-            overflow: hidden;
-            display: inline-block;
-            width: 0;
-            animation: typing 2.2s steps(38, end) forwards, blinkCursor 0.75s step-end infinite alternate;
-            text-shadow: 0 3px 12px rgba(0,0,0,0.8);
-            letter-spacing: 0.5px;
-        }
-
-        @keyframes typing { from { width: 0; } to { width: 100%; } }
-        @keyframes blinkCursor { from, to { border-color: transparent; } 50% { border-color: #2ecc71; } }
-
-        /* Glassmorphism Login Card */
         .login-card-container {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
             width: 100%;
             max-width: 420px;
             z-index: 1;
-        }
-
-        .login-card-container.show {
-            opacity: 1;
-            transform: translateY(0);
         }
 
         .glass-card {
@@ -219,15 +127,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-family: 'Georgia', serif;
             font-style: italic;
             font-weight: bold;
-            color: #1b4332;
+            color: #0b3b24;
             text-align: center;
             padding: 8px;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
-        .card-logo-circle .title-top { font-size: 0.75rem; line-height: 1; }
-        .card-logo-circle .title-amp { font-size: 0.55rem; margin: 1px 0; }
-        .card-logo-circle .title-bottom { font-size: 0.7rem; line-height: 1; }
+        .card-logo-circle .title-top { font-size: 0.65rem; line-height: 1.1; white-space: nowrap; }
+        .card-logo-circle .title-mid { font-size: 0.55rem; line-height: 1.1; white-space: nowrap; }
+        .card-logo-circle .title-bottom { font-size: 0.65rem; line-height: 1.1; white-space: nowrap; }
 
         .form-control-custom {
             background: rgba(255, 255, 255, 0.1);
@@ -270,37 +179,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             opacity: 0.9;
             transform: translateY(-1px);
         }
-
-        @media (max-width: 768px) {
-            .animated-welcome-text { font-size: 1.2rem; }
-            .intro-logo-badge { width: 100px; height: 100px; }
-        }
     </style>
 </head>
 <body>
 
-    <!-- Intro Screen Animation -->
-    <div id="intro-screen">
-        <div class="intro-logo-badge">
-            <span class="title-top">Employee</span>
-            <span class="title-amp">&</span>
-            <span class="title-bottom">Management</span>
-        </div>
-        <div class="animated-welcome-wrapper">
-            <div class="animated-welcome-text">
-                Welcome To Employee Management System
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Login View -->
     <div class="bg-garden">
-        <div class="login-card-container" id="loginWrapper">
+        <div class="login-card-container">
             <div class="glass-card text-center">
                 <div class="card-logo-circle">
                     <span class="title-top">Employee</span>
-                    <span class="title-amp">&</span>
-                    <span class="title-bottom">Management</span>
+                    <span class="title-mid">Management</span>
+                    <span class="title-bottom">System</span>
                 </div>
                 <h4 class="font-weight-bold mb-1">Employee Portal</h4>
                 <p class="text-white-50 small mb-4">Inventory & Staff Management System</p>
@@ -345,25 +234,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const introScreen = document.getElementById('intro-screen');
-            const loginWrapper = document.getElementById('loginWrapper');
-            const hasError = <?php echo (!empty($login_err) || !empty($username_err) || !empty($password_err)) ? 'true' : 'false'; ?>;
-
-            if (hasError) {
-                introScreen.style.display = 'none';
-                loginWrapper.classList.add('show');
-            } else {
-                setTimeout(function () {
-                    introScreen.style.opacity = '0';
-                    introScreen.style.visibility = 'hidden';
-                    setTimeout(function() {
-                        loginWrapper.classList.add('show');
-                    }, 300);
-                }, 2800); 
-            }
-        });
-    </script>
 </body>
 </html>

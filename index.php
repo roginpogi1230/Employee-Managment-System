@@ -1,179 +1,211 @@
 <?php
+// index.php - Employee Management System Intro & Main Dashboard
 session_start();
 
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: login.php");
     exit;
 }
 
 require_once "config.php";
-
-$user_role = $_SESSION["role"] ?? 'staff'; 
-$is_admin = ($user_role === 'admin');
-
-$total_employees = 0;
-$total_payroll = 0;
-$avg_salary = 0;
-
-$stats_sql = "SELECT COUNT(*) as total_count, SUM(salary) as total_sal, AVG(salary) as avg_sal FROM employees";
-if ($stats_result = mysqli_query($link, $stats_sql)) {
-    $stats = mysqli_fetch_assoc($stats_result);
-    $total_employees = $stats['total_count'] ?? 0;
-    $total_payroll = $stats['total_sal'] ?? 0;
-    $avg_salary = $stats['avg_sal'] ?? 0;
-}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Management System</title>
+    <title>Employee Management System - Dashboard</title>
     
-    <!-- Favicon Logo Icon sa Tab ng Browser -->
-    <link rel="icon" type="image/png" href="logo.png">
-    <!-- Kung may sarili kang image file sa folder mo (e.g., logo.png), palitan lang ang href sa: href="logo.png" -->
+    <!-- Custom Circular Favicon: Employee Management System -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='white' stroke='%230b3b24' stroke-width='3'/%3E%3Ctext x='50%25' y='36%25' font-family='Georgia, serif' font-style='italic' font-weight='bold' font-size='10' fill='%230b3b24' text-anchor='middle' dominant-baseline='middle'%3EEmployee%3C/text%3E%3Ctext x='50%25' y='52%25' font-family='Georgia, serif' font-style='italic' font-weight='bold' font-size='9' fill='%230b3b24' text-anchor='middle' dominant-baseline='middle'%3EManagement%3C/text%3E%3Ctext x='50%25' y='68%25' font-family='Georgia, serif' font-style='italic' font-weight='bold' font-size='10' fill='%230b3b24' text-anchor='middle' dominant-baseline='middle'%3ESystem%3C/text%3E%3C/svg%3E">
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
     <style>
-        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar-brand { font-weight: 700; }
-        .nav-link { font-weight: 500; }
-        .nav-item.active .nav-link { color: #2ecc71 !important; border-bottom: 2px solid #2ecc71; }
-        .main-container { margin-top: 25px; margin-bottom: 50px; }
-        .content-card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); background: #ffffff; }
-        .stat-card { border: none; border-radius: 10px; color: #fff; transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-3px); }
-        .user-badge { background: rgba(255, 255, 255, 0.2); padding: 6px 14px; border-radius: 20px; }
-        .role-badge-admin { background-color: #dc3545; color: #fff; font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; font-weight: 600; }
-        .role-badge-staff { background-color: #17a2b8; color: #fff; font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; font-weight: 600; }
-        #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 99999; display: flex; justify-content: center; align-items: center; opacity: 1; visibility: visible; transition: opacity 0.8s ease-out, visibility 0.8s ease-out; }
-        #preloader.fade-out { opacity: 0; visibility: hidden; }
-        .welcome-intro-title { font-size: 2.5rem; font-weight: 800; background: linear-gradient(270deg, #2ecc71, #17a2b8, #007bff, #2ecc71); background-size: 600% 600%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientShift 6s ease infinite, zoomInIntro 0.8s ease-out; margin-bottom: 10px; }
-        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        @keyframes zoomInIntro { from { opacity: 0; transform: scale(0.85) translateY(-15px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+        }
+
+        /* Intro Preloader Screen Overlay */
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)),
+                        url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1920&auto=format&fit=crop') no-repeat center center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            padding: 20px;
+        }
+
+        /* Circular Logo Badge sa Intro */
+        .intro-logo-badge {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+            margin-bottom: 20px;
+            padding: 8px;
+            text-align: center;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-weight: bold;
+            color: #0b3b24;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .intro-logo-badge .title-top { font-size: 0.65rem; line-height: 1.1; white-space: nowrap; }
+        .intro-logo-badge .title-mid { font-size: 0.55rem; line-height: 1.1; white-space: nowrap; }
+        .intro-logo-badge .title-bottom { font-size: 0.65rem; line-height: 1.1; white-space: nowrap; }
+
+        /* Animated Welcome Text */
+        .animated-welcome-wrapper {
+            display: inline-block;
+            max-width: 100%;
+            text-align: center;
+        }
+
+        .animated-welcome-text {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ffffff;
+            border-right: 3px solid #2ecc71;
+            white-space: nowrap;
+            overflow: hidden;
+            display: inline-block;
+            width: 0;
+            animation: typing 2.5s steps(40, end) forwards, blinkCursor 0.75s step-end infinite alternate;
+            text-shadow: 0 3px 12px rgba(0,0,0,0.8);
+            letter-spacing: 0.5px;
+        }
+
+        .intro-subtext {
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 10px;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+
+        @keyframes typing { from { width: 0; } to { width: 100%; } }
+        @keyframes blinkCursor { from, to { border-color: transparent; } 50% { border-color: #2ecc71; } }
+
+        @media (max-width: 768px) {
+            .animated-welcome-text { font-size: 1.1rem; }
+            .intro-logo-badge { width: 90px; height: 90px; }
+        }
+
+        /* Main Dashboard Styling */
+        .main-content {
+            padding: 30px;
+        }
+        .main-banner {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
     </style>
 </head>
 <body>
-    <div id="preloader">
-        <div class="text-center px-3">
-            <div class="spinner-border text-success mb-3" style="width: 3.5rem; height: 3.5rem;" role="status"><span class="sr-only">Loading...</span></div>
-            <h1 class="welcome-intro-title"><i class="fas fa-smile text-warning mr-2"></i>Welcome to Employee Management System</h1>
+
+    <!-- Intro / Welcome Animation Overlay -->
+    <div id="intro-screen">
+        <div class="intro-logo-badge">
+            <span class="title-top">Employee</span>
+            <span class="title-mid">Management</span>
+            <span class="title-bottom">System</span>
         </div>
+        <div class="animated-welcome-wrapper">
+            <div class="animated-welcome-text">
+                Welcome To Employee Management System
+            </div>
+        </div>
+        <div class="intro-subtext">Employee Management & Staff Control Portal</div>
     </div>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand" href="index.php"><i class="fas fa-leaf text-success mr-2"></i> Employee Management System</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mr-auto ml-lg-3">
-                    <li class="nav-item active"><a class="nav-link" href="index.php"><i class="fas fa-users mr-1"></i> Employees</a></li>
-                    <li class="nav-item"><a class="nav-link text-light" href="inventory.php"><i class="fas fa-boxes mr-1"></i> Inventory / Stocks</a></li>
-                    <li class="nav-item"><a class="nav-link text-light" href="reports.php"><i class="fas fa-chart-line mr-1"></i> Reports</a></li>
-                </ul>
-                <ul class="navbar-nav ml-auto align-items-center">
-                    <li class="nav-item mr-2"><a href="create.php" class="btn btn-success btn-sm"><i class="fas fa-user-plus mr-1"></i> Add Employee</a></li>
-                    <li class="nav-item mr-3"><a href="register.php" class="btn btn-primary btn-sm"><i class="fas fa-user-shield mr-1"></i> Add User</a></li>
-                    <li class="nav-item mr-3">
-                        <span class="navbar-text text-light user-badge">
-                            <i class="fas fa-user-circle mr-1"></i> Hi, <b><?php echo htmlspecialchars($_SESSION["username"]); ?></b>
-                            <span class="<?php echo $is_admin ? 'role-badge-admin' : 'role-badge-staff'; ?> ml-1"><?php echo strtoupper(htmlspecialchars($user_role)); ?></span>
-                        </span>
-                    </li>
-                    <li class="nav-item"><a href="logout.php" class="btn btn-outline-danger btn-sm"><i class="fas fa-sign-out-alt mr-1"></i> Logout</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid px-4 main-container">
-        <div class="row mb-4">
-            <div class="col-md-4 mb-3 mb-md-0">
-                <div class="card stat-card bg-primary p-3 shadow-sm">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-uppercase mb-1 text-white-50 font-weight-bold">Total Staff</h6>
-                            <h2 class="font-weight-bold mb-0"><?php echo number_format($total_employees); ?></h2>
-                        </div>
-                        <i class="fas fa-users fa-2x text-white-50"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3 mb-md-0">
-                <div class="card stat-card bg-success p-3 shadow-sm">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-uppercase mb-1 text-white-50 font-weight-bold">Monthly Payroll</h6>
-                            <h2 class="font-weight-bold mb-0">₱<?php echo number_format((float)$total_payroll, 2); ?></h2>
-                        </div>
-                        <i class="fas fa-money-bill-wave fa-2x text-white-50"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card stat-card bg-info p-3 shadow-sm">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-uppercase mb-1 text-white-50 font-weight-bold">Average Salary</h6>
-                            <h2 class="font-weight-bold mb-0">₱<?php echo number_format((float)$avg_salary, 2); ?></h2>
-                        </div>
-                        <i class="fas fa-calculator fa-2x text-white-50"></i>
-                    </div>
-                </div>
+    <!-- Main Dashboard View -->
+    <div class="container my-4 main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="font-weight-bold text-dark"><i class="fas fa-users-cog mr-2"></i>EMS Dashboard</h4>
+            <div>
+                <span class="mr-3 font-weight-bold text-secondary">Hello, <?php echo htmlspecialchars($_SESSION["username"]); ?>!</span>
+                <a href="logout.php" class="btn btn-outline-danger btn-sm"><i class="fas fa-sign-out-alt mr-1"></i> Logout</a>
             </div>
         </div>
 
-        <div class="card content-card p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3 class="font-weight-bold text-dark mb-0"><i class="fas fa-users-cog text-success mr-2"></i> Employee List</h3>
+        <div class="main-banner text-center">
+            <h2><i class="fas fa-id-card mr-2"></i> EMPLOYEE MANAGEMENT SYSTEM</h2>
+            <p class="mb-0 text-white-50">Manage staff records, departments, and monitor employee availability seamlessly.</p>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="font-weight-bold mb-0 text-dark"><i class="fas fa-list mr-2"></i> Employee Directory</h5>
+                <a href="create.php" class="btn btn-success btn-sm"><i class="fas fa-user-plus mr-1"></i> Add Employee</a>
             </div>
-            <div class="table-responsive">
-                <?php
-                $sql = "SELECT * FROM employees ORDER BY id DESC";
-                if($result = mysqli_query($link, $sql)){
-                    if(mysqli_num_rows($result) > 0){
-                        echo '<table id="employeeTable" class="table table-bordered table-hover align-middle w-100">';
-                            echo "<thead class='thead-dark'><tr><th>#</th><th>Name</th><th>Address</th><th>Salary</th><th style='width: 240px;'>Actions</th></tr></thead>";
-                            echo "<tbody>";
-                            while($row = mysqli_fetch_array($result)){
-                                echo "<tr>";
-                                    echo "<td>" . htmlspecialchars($row['id']) . "</td>";
-                                    echo "<td><b>" . htmlspecialchars($row['name']) . "</b></td>";
-                                    echo "<td>" . htmlspecialchars($row['address']) . "</td>";
-                                    echo "<td>₱" . number_format((float)$row['salary'], 2) . "</td>";
-                                    echo "<td>";
-                                        echo '<a href="read.php?id='. $row['id'] .'" class="btn btn-info btn-sm mr-1"><i class="fas fa-eye"></i> View</a>';
-                                        echo '<a href="update.php?id='. $row['id'] .'" class="btn btn-warning btn-sm mr-1"><i class="fas fa-edit"></i> Edit</a>';
-                                        echo '<a href="delete.php?id='. $row['id'] .'" class="btn btn-danger btn-sm" onclick="return confirm(\'Sigurado ka bang gusto mong burahin ang empleyadong ito?\');"><i class="fas fa-trash"></i> Delete</a>';
-                                    echo "</td>";
-                                echo "</tr>";
-                            }
-                            echo "</tbody>";                            
-                        echo "</table>";
-                        mysqli_free_result($result);
-                    } else {
-                        echo '<div class="alert alert-warning text-center my-3"><em>No employee records found.</em></div>';
-                    }
-                }
-                mysqli_close($link);
-                ?>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Full Name</th>
+                                <th>Position</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th class="text-center" style="width: 140px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td class="font-weight-bold">Juan Dela Cruz</td>
+                                <td>Administrator</td>
+                                <td>IT Department</td>
+                                <td><span class="badge badge-success px-2 py-1">Active</span></td>
+                                <td class="text-center">
+                                    <a href="update.php?id=1" class="text-primary mr-2"><i class="fas fa-edit"></i></a>
+                                    <a href="read.php?id=1" class="text-info mr-2"><i class="fas fa-eye"></i></a>
+                                    <a href="delete.php?id=1" class="text-danger"><i class="fas fa-trash-alt"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
     <script>
-        $(window).on('load', function() {
-            setTimeout(function() { $('#preloader').addClass('fade-out'); }, 1800);
-        });
-        $(document).ready(function() {
-            $('#employeeTable').DataTable({ "pageLength": 10, "ordering": true, "responsive": true });
+        // JavaScript para kusang mawala ang intro screen pagkatapos ng ilang segundo
+        document.addEventListener("DOMContentLoaded", function () {
+            const introScreen = document.getElementById('intro-screen');
+            setTimeout(function () {
+                introScreen.style.opacity = '0';
+                introScreen.style.visibility = 'hidden';
+            }, 3200); // Mag-a-fade out pagkalipas ng 3.2 segundo
         });
     </script>
 </body>
